@@ -93,6 +93,9 @@ export interface AppConfig {
   timeout: number;
   proxy?: string;
   cursorModel: string;
+  auth?: {
+    apiKey: string;
+  };
   vision?: {
     enabled: boolean;
     mode: 'ocr' | 'api';

@@ -61,6 +61,13 @@ export function getConfig(): AppConfig {
     config.proxy = proxy;
   }
 
+  const apiKey = getEnv('API_KEY');
+  if (apiKey) {
+    config.auth = {
+      apiKey,
+    };
+  }
+
   const hasVisionEnv = [
     'VISION_ENABLED',
     'VISION_MODE',

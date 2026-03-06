@@ -68,7 +68,9 @@ function convertToAnthropicRequest(body: OpenAIChatRequest): AnthropicRequest {
       case 'user':
         messages.push({
           role: 'user',
-          content: extractOpenAIContent(msg),
+          content: normalizeAnthropicMessageContent(
+            extractOpenAIContentBlocks(msg),
+          ),
         });
         break;
 
@@ -103,9 +105,7 @@ function convertToAnthropicRequest(body: OpenAIChatRequest): AnthropicRequest {
           role: 'assistant',
           content: blocks.length > 0
             ? blocks
-            : (typeof extractOpenAIContentBlocks(msg) === 'string'
-              ? extractOpenAIContentBlocks(msg) as string
-              : ''),
+            : normalizeAnthropicMessageContent(extractOpenAIContentBlocks(msg)),
         });
         break;
       }
@@ -145,6 +145,13 @@ function convertToAnthropicRequest(body: OpenAIChatRequest): AnthropicRequest {
       ? (Array.isArray(body.stop) ? body.stop : [body.stop])
       : undefined,
   };
+}
+
+function normalizeAnthropicMessageContent(
+  content: string | AnthropicContentBlock[],
+): string | AnthropicContentBlock[] {
+  if (typeof content === 'string') return content;
+  return content.length > 0 ? content : '';
 }
 
 /**

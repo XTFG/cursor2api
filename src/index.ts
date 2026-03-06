@@ -20,6 +20,63 @@ function normalizePath(pathname: string): string {
   return pathname.replace(/\/+$/, '') || '/';
 }
 
+function isPublicPath(path: string): boolean {
+  return path === '/' || path === '/health';
+}
+
+function extractRequestApiKey(request: Request): string | undefined {
+  const authorization = request.headers.get('authorization');
+  if (authorization) {
+    const [scheme, credentials] = authorization.split(/\s+/, 2);
+    if (
+      scheme?.toLowerCase() === 'bearer' &&
+      credentials &&
+      credentials.trim()
+    ) {
+      return credentials.trim();
+    }
+  }
+
+  const headerApiKey = request.headers.get('x-api-key');
+  if (headerApiKey?.trim()) {
+    return headerApiKey.trim();
+  }
+
+  return undefined;
+}
+
+function unauthorizedResponse(): Response {
+  return jsonResponse(
+    {
+      type: 'error',
+      error: {
+        type: 'authentication_error',
+        message:
+          'Invalid or missing API key. Use Authorization: Bearer <API_KEY> or x-api-key.',
+      },
+    },
+    401,
+    {
+      'WWW-Authenticate': 'Bearer',
+    },
+  );
+}
+
+function authGuard(request: Request, path: string): Response | null {
+  const expectedApiKey = getConfig().auth?.apiKey;
+
+  if (!expectedApiKey || isPublicPath(path)) {
+    return null;
+  }
+
+  const actualApiKey = extractRequestApiKey(request);
+  if (actualApiKey === expectedApiKey) {
+    return null;
+  }
+
+  return unauthorizedResponse();
+}
+
 function buildAppRequest(
   request: Request,
   path: string,
@@ -102,6 +159,11 @@ async function handleRequest(request: Request): Promise<Response> {
           version: VERSION,
           runtime: 'deno-deploy',
         });
+    }
+
+    const unauthorized = authGuard(request, path);
+    if (unauthorized) {
+      return unauthorized;
     }
 
     if (path === '/v1/models') {
