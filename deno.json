@@ -1,0 +1,20 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-env --allow-net --watch src/index.ts",
+    "start": "deno run --allow-env --allow-net src/index.ts",
+    "check": "deno check src/index.ts",
+    "fmt": "deno fmt",
+    "lint": "deno lint"
+  },
+  "fmt": {
+    "semiColons": true,
+    "singleQuote": true
+  },
+  "lint": {
+    "rules": {
+      "exclude": [
+        "no-explicit-any"
+      ]
+    }
+  }
+}

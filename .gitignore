@@ -1,0 +1,21 @@
+# Environment
+.env
+.env.local
+
+# Deno cache / build artifacts
+dist/
+build/
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
